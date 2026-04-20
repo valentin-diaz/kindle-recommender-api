@@ -15,3 +15,10 @@ async def get_books(offset: int = 0, limit: int = 10, search: str | None = None,
     books, total = await books_service.get_books(db, offset, limit, search)
     books_response = [BookResponse.model_validate(book) for book in books]
     return PaginatedBooksResponse(books=books_response, total=total)
+
+@router.get("/{book_id}", response_model=BookResponse)
+async def get_book(book_id: str, db: AsyncSession = Depends(get_db)):
+    book = await books_service.get_book(db, book_id)
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+    return BookResponse.model_validate(book)

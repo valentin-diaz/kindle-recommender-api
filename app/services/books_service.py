@@ -37,3 +37,8 @@ async def get_books_count(db: AsyncSession):
     stmt = select(func.count(Book.id)).select_from(Book)
     result = await db.execute(stmt)
     return result.scalar_one()
+
+async def get_book(db: AsyncSession, book_id: str):
+    stmt = select(Book).where(Book.id == book_id)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
