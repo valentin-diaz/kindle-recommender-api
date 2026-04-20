@@ -9,3 +9,7 @@ class BookResponse(BaseModel):
     author_name: str = Field(min_length=2, max_length=255, examples=["F. Scott Fitzgerald"])
     image_url: str = Field(min_length=0, max_length=255, examples=["https://m.media-amazon.com/images/I/51bDQOZv-YL.jpg"])
     description: str = Field(min_length=0, examples=["A classic American novel."])
+
+class PaginatedBooksResponse(BaseModel):
+    books: list[BookResponse]
+    total: int = Field(ge=0, examples=[100])
