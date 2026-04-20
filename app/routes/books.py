@@ -11,8 +11,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=PaginatedBooksResponse)
-async def get_books(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
-    books = await books_service.get_books(db, offset, limit)
-    total = await books_service.get_books_count(db)
+async def get_books(offset: int = 0, limit: int = 10, search: str | None = None, db: AsyncSession = Depends(get_db)):
+    books, total = await books_service.get_books(db, offset, limit, search)
     books_response = [BookResponse.model_validate(book) for book in books]
     return PaginatedBooksResponse(books=books_response, total=total)
