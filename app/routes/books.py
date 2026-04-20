@@ -11,5 +11,5 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=list[BookResponse])
-async def get_books(page: int = 1, db: AsyncSession = Depends(get_db)):
-    return await books_service.get_books(db, page)
+async def get_books(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+    return await books_service.get_books(db, offset, limit)

@@ -11,7 +11,6 @@ class Book(Base):
 
     id: Mapped[str] = mapped_column(String(40), primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    subtitle: Mapped[str] = mapped_column(String(100), nullable=True)
     categories: Mapped[str] = mapped_column(String(255), nullable=True)
     author_name: Mapped[str] = mapped_column(String(150), nullable=False)
     image_url: Mapped[str] = mapped_column(String(150), nullable=True)
