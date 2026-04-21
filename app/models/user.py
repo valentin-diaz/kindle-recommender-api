@@ -10,5 +10,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(String(40), primary_key=True, index=True)
+    top_category: Mapped[str] = mapped_column(String(100), nullable=True)
+    top_books: Mapped[List[str]] = mapped_column(String(150), nullable=True)  # Store as comma-separated string
     
     reviews: Mapped[List["Review"]] = relationship("Review", back_populates="user")
