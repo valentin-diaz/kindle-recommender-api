@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import books
+from app.routes import users
 from config import settings
 import uvicorn
 
@@ -15,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(books.router)
+app.include_router(users.router)
 
 @app.get("/")
 async def root():
