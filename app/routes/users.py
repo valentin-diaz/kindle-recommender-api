@@ -12,8 +12,8 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=PaginatedUsersResponse)
-async def get_users(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
-    users, total = await users_service.get_users(db, offset, limit)
+async def get_users(offset: int = 0, limit: int = 10, search: str | None = None, db: AsyncSession = Depends(get_db)):
+    users, total = await users_service.get_users(db, offset, limit, search)
     # Agregar los top_books como parte de la respuesta
     users_response = []
     for user in users:
