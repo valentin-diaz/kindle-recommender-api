@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.models import book
 from app.schemas.books import BookResponse, PaginatedBooksResponse
+from app.schemas.recommendations import RecommendationsResponse, SingleRecommendation
 from app.services import books_service
 from implicit.cpu.als import AlternatingLeastSquares
 from scipy.sparse import csr_matrix
@@ -13,7 +14,7 @@ router = APIRouter(
     tags=["recommendations"]
 )
 
-@router.get("/top-5/{user_id}")
+@router.get("/top-5/{user_id}", response_model=RecommendationsResponse)
 async def get_top_5_recommendations(
     user_id: str, 
     db: AsyncSession = Depends(get_db), 
@@ -31,10 +32,12 @@ async def get_top_5_recommendations(
     recommended_indices, scores = als_model.recommend(user_idx, user_item_matrix[user_idx], N=5, filter_already_liked_items=True)
     
     recommended_books = []
-    for book_idx in recommended_indices:
+    for book_idx, score in zip(recommended_indices, scores):
         book_id = id_book_mapping[book_idx]
         book_data = await books_service.get_book(db, book_id)
         if book_data:
-            recommended_books.append(BookResponse.model_validate(book_data))
+            already_liked = user_item_matrix[user_idx, book_idx] > 0
+            recommended_books.append(SingleRecommendation(book=BookResponse.model_validate(book_data), score=score, already_liked=already_liked))
+            
     
-    return recommended_books
+    return RecommendationsResponse(user_id=user_id, recommended_books=recommended_books)
