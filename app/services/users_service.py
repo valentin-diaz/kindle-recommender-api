@@ -32,3 +32,7 @@ async def get_users(db: AsyncSession, offset: int, limit: int, search: str | Non
     users = users_result.scalars().all()
 
     return users, total
+
+async def get_user(db: AsyncSession, user_id: str):
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
