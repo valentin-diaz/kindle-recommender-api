@@ -63,6 +63,6 @@ async def get_similar_books_implicit(
         book_data = await books_service.get_book(db, similar_book_id)
         if book_data:
             already_liked = user_item_matrix[:, idx].sum() > 0
-            similar_books.append(SimilarBookImplicitRecommendation(book=BookResponse.model_validate(book_data), similarity_score=score, already_liked=already_liked))
+            similar_books.append(SimilarBookImplicitRecommendation(book=BookResponse.model_validate(book_data), score=score, already_liked=already_liked))
     
     return SimilarBooksImplicitResponse(book_id=book_id, similar_books=similar_books)

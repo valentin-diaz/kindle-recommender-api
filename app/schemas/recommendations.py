@@ -18,7 +18,7 @@ class SimilarBookImplicitRecommendation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     book: books.BookResponse
-    similarity_score: float = Field(ge=0, le=1, examples=[0.85])
+    score: float = Field(ge=0, le=1, examples=[0.85])
     already_liked: bool = Field(default=False, examples=[False])
 
 class SimilarBooksImplicitResponse(BaseModel):
