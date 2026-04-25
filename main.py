@@ -16,6 +16,7 @@ async def lifespan(app: FastAPI):
     app.state.id_user_mapping = joblib.load("./ml/idx_to_userid.pkl")
     app.state.id_book_mapping = joblib.load("./ml/idx_to_bookid.pkl")
     app.state.user_item_matrix = joblib.load("./ml/user_item_matrix.pkl")
+    app.state.svd_model = joblib.load("./ml/svd_model.pkl")
     yield
     # Aquí puedes colocar cualquier código de limpieza que necesites, como cerrar conexiones a la base de datos
     print("Cerrando la aplicación...")
@@ -25,7 +26,7 @@ async def lifespan(app: FastAPI):
     app.state.id_user_mapping = None
     app.state.id_book_mapping = None
     app.state.user_item_matrix = None
-
+    app.state.svd_model = None
 app = FastAPI(lifespan=lifespan)
 
 

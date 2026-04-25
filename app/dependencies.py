@@ -1,6 +1,7 @@
 from fastapi import Request
 from implicit.cpu.als import AlternatingLeastSquares as ALSModelCPU
 from scipy.sparse import csr_matrix
+from surprise import SVD
 import typing
 
 def get_als_model(request: Request) -> ALSModelCPU:
@@ -32,3 +33,8 @@ def get_id_book_mapping(request: Request) -> typing.Dict[int, str]:
     if not hasattr(request.app.state, "id_book_mapping"):
         raise RuntimeError("ID to Book mapping not found in app state. Make sure to initialize it on startup.")
     return request.app.state.id_book_mapping
+
+def get_svd_model(request: Request) -> SVD:
+    if not hasattr(request.app.state, "svd_model"):
+        raise RuntimeError("SVD model not found in app state. Make sure to initialize it on startup.")
+    return request.app.state.svd_model
