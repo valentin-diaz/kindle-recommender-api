@@ -5,7 +5,7 @@ class Top5SingleRecommendation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     book: books.BookResponse
-    score: float = Field(ge=0, examples=[4.5])
+    predicted_rating: float = Field(ge=0, le=5, examples=[4.5])
     already_liked: bool = Field(default=False, examples=[False])
 
 class Top5RecommendationsResponse(BaseModel):
