@@ -49,22 +49,27 @@ async def get_similar_books_implicit(
     als_model: AlternatingLeastSquares = Depends(get_als_model), 
     user_item_matrix: csr_matrix = Depends(get_user_item_matrix),
     book_id_mapping: dict = Depends(get_book_id_mapping), 
-    id_book_mapping: dict = Depends(get_id_book_mapping)
+    id_book_mapping: dict = Depends(get_id_book_mapping),
+    svd_model: SVD = Depends(get_svd_model)
 ):
     if book_id not in book_id_mapping:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
     
     book_idx = book_id_mapping[book_id]
-    similar_indices, similarity_scores = als_model.similar_items(book_idx, N=10)
-    
+    candidate_indices, scores = als_model.similar_items(book_idx, N=10)
+    # Obtener tuplas de todos los candidatos con su puntuación, pero sin el primer elemento (que es el mismo libro)
+    candidates = [(idx, score) for idx, score in list(zip(candidate_indices, scores))[1:]]
+
     similar_books = []
-    for idx, score in zip(similar_indices, similarity_scores):
-        similar_book_id = id_book_mapping[idx]
-        if similar_book_id == book_id:
-            continue  # Skip the same book
-        book_data = await books_service.get_book(db, similar_book_id)
+    predictions = [
+        (id_book_mapping[candidate_idx], svd_model.predict("user123", id_book_mapping[candidate_idx]).est, score) for candidate_idx, score in candidates
+    ]
+    get_top_5_similars = sorted(predictions, key=lambda x: (x[1] - 1) / 4 * x[2], reverse=True)[:5]
+    for book_id, pred, score in get_top_5_similars:
+        book_idx = book_id_mapping[book_id]
+        book_data = await books_service.get_book(db, book_id)
         if book_data:
-            already_liked = user_item_matrix[:, idx].sum() > 0
-            similar_books.append(SimilarBookImplicitRecommendation(book=BookResponse.model_validate(book_data), score=score, already_liked=already_liked))
+            already_liked = user_item_matrix[:, book_idx].sum() > 0
+            similar_books.append(SimilarBookImplicitRecommendation(book=BookResponse.model_validate(book_data), predicted_rating=pred, score=score, already_liked=already_liked))
     
     return SimilarBooksImplicitResponse(book_id=book_id, similar_books=similar_books)
