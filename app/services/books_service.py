@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from app.models import book
 from app.models.book import Book
 
 async def get_books(db: AsyncSession, offset: int, limit: int, search: str | None = None):
@@ -42,3 +43,27 @@ async def get_book(db: AsyncSession, book_id: str):
     stmt = select(Book).where(Book.id == book_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
+
+async def get_similar_books(db: AsyncSession, book_id: str, limit: int = 5):
+    book_stmt = select(Book).where(Book.id == book_id)
+    book_result = await db.execute(book_stmt)
+    book = book_result.scalar_one_or_none()
+
+    if not book or book.embedding is None:
+        return []
+
+    similarity_expr = (
+        1 - (Book.embedding.cosine_distance(book.embedding) / 2.0)
+    ).label('similarity')    
+
+    similarity_stmt = (
+        select(Book, similarity_expr)
+        .where(Book.id != book_id)
+        .order_by(Book.embedding.cosine_distance(book.embedding).asc())
+        .limit(limit)
+    )
+
+    similarity_result = await db.execute(similarity_stmt)
+    similar_books = [(row.Book, row.similarity) for row in similarity_result.fetchall()]
+
+    return similar_books
