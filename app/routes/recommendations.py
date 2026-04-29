@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.models import book
-from app.schemas.books import BookResponse, PaginatedBooksResponse
-from app.schemas.recommendations import Top5RecommendationsResponse, Top5SingleRecommendation, SimilarBookImplicitRecommendation, SimilarBooksImplicitResponse
+from app.schemas.books import BookResponse
+from app.schemas.recommendations import SimilarBookContentBasedRecommendation, SimilarBooksContentBasedResponse, Top5RecommendationsResponse, Top5SingleRecommendation, SimilarBookImplicitRecommendation, SimilarBooksImplicitResponse
 from app.services import books_service
 from implicit.cpu.als import AlternatingLeastSquares
 from surprise import SVD
@@ -73,3 +73,14 @@ async def get_similar_books_implicit(
             similar_books.append(SimilarBookImplicitRecommendation(book=BookResponse.model_validate(book_data), predicted_rating=pred, score=score, already_liked=already_liked))
     
     return SimilarBooksImplicitResponse(book_id=book_id, similar_books=similar_books)
+
+@router.get("/similars-content/{book_id}", response_model=SimilarBooksContentBasedResponse)
+async def get_similar_books_content_based(book_id: str, limit: int = 5, db: AsyncSession = Depends(get_db)):
+    similar_books = await books_service.get_similar_books(db, book_id, limit)
+    return SimilarBooksContentBasedResponse(
+        book_id=book_id,
+        similar_books=[
+            SimilarBookContentBasedRecommendation(book=BookResponse.model_validate(book), similarity=similarity)
+            for book, similarity in similar_books
+        ]
+    )

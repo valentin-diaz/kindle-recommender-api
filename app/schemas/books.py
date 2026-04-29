@@ -13,7 +13,3 @@ class BookResponse(BaseModel):
 class PaginatedBooksResponse(BaseModel):
     books: list[BookResponse]
     total: int = Field(ge=0, examples=[100])
-
-class SimilarBookResponse(BaseModel):
-    book: BookResponse
-    similarity: float = Field(ge=0.0, le=1.0, examples=[0.85])

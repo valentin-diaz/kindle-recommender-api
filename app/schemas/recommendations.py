@@ -27,3 +27,13 @@ class SimilarBooksImplicitResponse(BaseModel):
 
     book_id: str = Field(min_length=8, max_length=15, examples=["B00DNQWXQM"])
     similar_books: list[SimilarBookImplicitRecommendation] = Field(default=[])
+
+class SimilarBookContentBasedRecommendation(BaseModel):
+    book: books.BookResponse
+    similarity: float = Field(ge=0.0, le=1.0, examples=[0.85])
+
+class SimilarBooksContentBasedResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    book_id: str = Field(min_length=8, max_length=15, examples=["B00DNQWXQM"])
+    similar_books: list[SimilarBookContentBasedRecommendation] = Field(default=[])
