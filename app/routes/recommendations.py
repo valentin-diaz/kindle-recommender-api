@@ -80,7 +80,7 @@ async def get_similar_books_content_based(book_id: str, limit: int = 5, db: Asyn
     return SimilarBooksContentBasedResponse(
         book_id=book_id,
         similar_books=[
-            SimilarBookContentBasedRecommendation(book=BookResponse.model_validate(book), similarity=similarity)
+            SimilarBookContentBasedRecommendation(book=BookResponse.model_validate(book), score=similarity)
             for book, similarity in similar_books
         ]
     )
